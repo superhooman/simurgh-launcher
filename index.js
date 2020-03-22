@@ -61,7 +61,7 @@ app.on('window-all-closed', () => {
 	}
 });
 
-app.on('activate', async () => {
+app.on('ready', async () => {
 	if (!mainWindow) {
 		mainWindow = await createMainWindow();
 	}
