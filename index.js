@@ -1,13 +1,13 @@
 'use strict';
 const path = require('path');
-const { app, BrowserWindow, Menu } = require('electron');
+const {app, BrowserWindow} = require('electron');
 const {autoUpdater} = require('electron-updater');
-const ipc = require('electron').ipcMain
-const { is } = require('electron-util');
+const ipc = require('electron').ipcMain;
+const {is} = require('electron-util');
 const unhandled = require('electron-unhandled');
 const contextMenu = require('electron-context-menu');
 
-const { Client, Authenticator } = require("./MCLC/index.js");
+const {Client, Authenticator} = require('./MCLC');
 
 unhandled();
 contextMenu();
@@ -34,7 +34,7 @@ const createMainWindow = async () => {
 		width: 425,
 		height: 650,
 		minWidth: 390,
-		backgroundColor: "#ffffff",
+		backgroundColor: '#ffffff',
 		minHeight: 450,
 		webPreferences: {
 			nodeIntegration: true
@@ -82,40 +82,40 @@ app.on('activate', async () => {
 ipc.on('launch', (event, data) => {
 	const launcher = new Client();
 
-	let opts = {
+	const opts = {
 		clientPackage: null,
 		authorization: Authenticator.getAuth(data.username, data.password),
-		root: __dirname + "/minecraft",
+		root: path.join(__dirname, '/minecraft'),
 		version: {
-			number: "1.15.2",
-			type: "release"
+			number: '1.15.2',
+			type: 'release'
 		},
 		memory: {
-			max: "6000",
-			min: "4000"
+			max: '6000',
+			min: '4000'
 		}
-	}
+	};
 
 	launcher.launch(opts);
 
-	launcher.on("arguments", () => {
-		mainWindow.webContents.send("setState", {
-			status: "launched",
-		})
-	})
+	launcher.on('arguments', () => {
+		mainWindow.webContents.send('setState', {
+			status: 'launched'
+		});
+	});
 
-	launcher.on("close", () => {
-		mainWindow.webContents.send("setState", {
-			status: "init",
-		})
-	})
+	launcher.on('close', () => {
+		mainWindow.webContents.send('setState', {
+			status: 'init'
+		});
+	});
 
-	launcher.on("download-status", (data) => {
+	launcher.on('download-status', data => {
 		const percent = Math.round((data.current / data.total) * 100);
-		mainWindow.webContents.send("setState", {
-			status: "downloading",
+		mainWindow.webContents.send('setState', {
+			status: 'downloading',
 			name: data.name,
 			percent
-		})
+		});
 	});
-})
+});
