@@ -1,31 +1,29 @@
 'use strict';
 const path = require('path');
-const {app, BrowserWindow, Menu} = require('electron');
-/// const {autoUpdater} = require('electron-updater');
-const {is} = require('electron-util');
+const { app, BrowserWindow, Menu } = require('electron');
+const {autoUpdater} = require('electron-updater');
+const ipc = require('electron').ipcMain
+const { is } = require('electron-util');
 const unhandled = require('electron-unhandled');
-const debug = require('electron-debug');
 const contextMenu = require('electron-context-menu');
-const config = require('./config');
-const menu = require('./menu');
+
+const { Client, Authenticator } = require("./MCLC/index.js");
 
 unhandled();
-debug();
 contextMenu();
 
-// Note: Must match `build.appId` in package.json
-app.setAppUserModelId('com.company.AppName');
+app.setAppUserModelId('com.uenify.simurgh');
 
 // Uncomment this before publishing your first version.
 // It's commented out as it throws an error if there are no published versions.
-// if (!is.development) {
-// 	const FOUR_HOURS = 1000 * 60 * 60 * 4;
-// 	setInterval(() => {
-// 		autoUpdater.checkForUpdates();
-// 	}, FOUR_HOURS);
-//
-// 	autoUpdater.checkForUpdates();
-// }
+if (!is.development) {
+	const FOUR_HOURS = 1000 * 60 * 60 * 4;
+	setInterval(() => {
+		autoUpdater.checkForUpdates();
+	}, FOUR_HOURS);
+
+	autoUpdater.checkForUpdates();
+}
 
 // Prevent window from being garbage collected
 let mainWindow;
@@ -33,13 +31,15 @@ let mainWindow;
 const createMainWindow = async () => {
 	const win = new BrowserWindow({
 		title: app.name,
-		show: false,
-		width: 600,
-		height: 400
-	});
-
-	win.on('ready-to-show', () => {
-		win.show();
+		width: 425,
+		height: 650,
+		minWidth: 390,
+		backgroundColor: "#ffffff",
+		minHeight: 450,
+		titleBarStyle: "hidden",
+		webPreferences: {
+			nodeIntegration: true
+		}
 	});
 
 	win.on('closed', () => {
@@ -48,7 +48,7 @@ const createMainWindow = async () => {
 		mainWindow = undefined;
 	});
 
-	await win.loadFile(path.join(__dirname, 'index.html'));
+	await win.loadFile(path.join(__dirname, 'app/index.html'));
 
 	return win;
 };
@@ -80,11 +80,43 @@ app.on('activate', async () => {
 	}
 });
 
-(async () => {
-	await app.whenReady();
-	Menu.setApplicationMenu(menu);
-	mainWindow = await createMainWindow();
+ipc.on('launch', (event, data) => {
+	const launcher = new Client();
 
-	const favoriteAnimal = config.get('favoriteAnimal');
-	mainWindow.webContents.executeJavaScript(`document.querySelector('header p').textContent = 'Your favorite animal is ${favoriteAnimal}'`);
-})();
+	let opts = {
+		clientPackage: null,
+		authorization: Authenticator.getAuth(data.username, data.password),
+		root: "./minecraft",
+		version: {
+			number: "1.15.2",
+			type: "release"
+		},
+		memory: {
+			max: "6000",
+			min: "4000"
+		}
+	}
+
+	launcher.launch(opts);
+
+	launcher.on("arguments", () => {
+		mainWindow.webContents.send("setState", {
+			status: "launched",
+		})
+	})
+
+	launcher.on("close", () => {
+		mainWindow.webContents.send("setState", {
+			status: "init",
+		})
+	})
+
+	launcher.on("download-status", (data) => {
+		const percent = Math.round((data.current / data.total) * 100);
+		mainWindow.webContents.send("setState", {
+			status: "downloading",
+			name: data.name,
+			percent
+		})
+	});
+})
