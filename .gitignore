@@ -3,3 +3,4 @@ yarn.lock
 /dist
 minecraft/*
 app/build/*
+.DS_Store

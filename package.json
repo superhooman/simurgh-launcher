@@ -1,7 +1,7 @@
 {
 	"name": "simurgh-launcher",
 	"productName": "Simurgh Launcher",
-	"version": "1.0.0",
+	"version": "0.0.0",
 	"description": "The best app ever",
 	"license": "MIT",
 	"repository": "uenify/simurgh-launcher",
@@ -24,7 +24,9 @@
 		"startall": "npm-run-all --parallel dev start",
 		"start": "electron .",
 		"pack": "electron-builder --dir",
-		"dist": "electron-builder --macos --windows",
+		"distWin": "electron-builder --windows",
+		"distMac": "electron-builder --mac",
+		"dist": "electron-builder --mac --windows",
 		"release": "np"
 	},
 	"dependencies": {
@@ -33,6 +35,7 @@
 		"antd": "^4.0.3",
 		"axios": "^0.19.2",
 		"checksum": "^0.1.1",
+		"electron-builder-squirrel-windows": "^22.4.1",
 		"electron-context-menu": "^0.15.0",
 		"electron-debug": "^3.0.0",
 		"electron-store": "^5.1.0",
@@ -104,6 +107,9 @@
 				"deb"
 			],
 			"category": "Games"
+		},
+		"win": {
+			"target": "zip"
 		}
 	}
 }

@@ -36,7 +36,6 @@ const createMainWindow = async () => {
 		minWidth: 390,
 		backgroundColor: "#ffffff",
 		minHeight: 450,
-		titleBarStyle: "hidden",
 		webPreferences: {
 			nodeIntegration: true
 		}
@@ -86,7 +85,7 @@ ipc.on('launch', (event, data) => {
 	let opts = {
 		clientPackage: null,
 		authorization: Authenticator.getAuth(data.username, data.password),
-		root: "./minecraft",
+		root: __dirname + "/minecraft",
 		version: {
 			number: "1.15.2",
 			type: "release"
