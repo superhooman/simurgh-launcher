@@ -23,6 +23,7 @@
 		"dev": "webpack-dev-server",
 		"startall": "npm-run-all --parallel dev start",
 		"start": "electron .",
+		"build": "webpack",
 		"pack": "electron-builder --dir",
 		"distWin": "electron-builder --windows",
 		"distMac": "electron-builder --mac",
