@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
-import {Tabs, Typography, Progress, Button, Upload, message} from 'antd';
-import {UploadOutlined} from '@ant-design/icons';
-import {getUser, request} from '../utils/api';
+import {Tabs, Typography, Progress, Button, Upload, Card, message} from 'antd';
+import {UploadOutlined, SaveOutlined, DeleteOutlined} from '@ant-design/icons';
+import {getUser, getToken, request, setToken} from '../utils/api';
 import Skinview3d from 'react-skinview3d';
 
 const ipc = require('electron').ipcRenderer;
@@ -20,10 +20,16 @@ const getSkin = skin => {
 	return `https://mc.uenify.com/skin/${skin}`;
 };
 
+const getCape = cape => {
+	return `https://mc.uenify.com/cape/${cape}`;
+};
+
 export default () => {
 	const [state, setState] = useState({
 		status: 'init'
 	});
+
+	const [user, setUser] = useState(getUser());
 
 	const [loading, setLoading] = useState(false);
 	const [skin, setSkin] = useState(null);
@@ -70,9 +76,12 @@ export default () => {
 		}).then(res => {
 			if (res.data && res.data.success) {
 				setSkin(null);
-				const user = getUser();
-				user.skin = res.data.user.skin;
-				localStorage.setItem('user', JSON.stringify(user));
+				const user = {
+					...getUser(),
+					skin: skin.file
+				};
+				setUser(user);
+				setToken(user, getToken(), true);
 				message.success('Skin setted');
 			}
 		});
@@ -81,7 +90,7 @@ export default () => {
 	return (
 		<div className="Home">
 			<div className="header">
-				<Title level={4}>Logged as {getUser().username}</Title>
+				<Title level={4}>Logged as {user.username}</Title>
 			</div>
 			<Tabs defaultActiveKey="1">
 				<TabPane
@@ -119,41 +128,47 @@ export default () => {
 						</span>
 					}
 				>
-					<div className="container">
-						<div className="skin"><Skinview3d width="200" height="280" skinUrl={skin ? getSkin(skin.file) : getSkin(getUser().skin)}/></div>
-						{skin ? null : <Upload
-							name="file"
-							showUploadList={false}
-							customRequest={async info => {
-								const data = new FormData();
-								data.append('skin', info.file);
-								return request({
-									url: 'api/texture/uploadSkin',
-									method: 'POST',
-									data
-								}).then(res => {
-									if (res.data && res.data.success) {
-										info.onSuccess(res.data);
-									} else {
-										message.error(res.data.message);
-									}
-								});
-							}}
-							beforeUpload={beforeUpload}
-							onChange={handleChange}>
-							<Button loading={loading} disabled={Boolean(skin)}>
-								{skin ? 'Uploaded' : <><UploadOutlined/> Click to Upload</>}
+					<div className="container profile">
+						<Card
+							style={{width: 300}}
+							cover={<div className="skin"><Skinview3d width="300" height="280" capeUrl={getCape(user.cape)} skinUrl={skin ? getSkin(skin.file) : getSkin(user.skin)}/></div>}
+							actions={
+								(skin ? [<SaveOutlined key="1" onClick={saveSkin}/>, <DeleteOutlined key="2" onClick={() => setSkin(null)}/>] : [<Upload
+									key="1"
+									name="file"
+									showUploadList={false}
+									customRequest={async info => {
+										const data = new FormData();
+										data.append('skin', info.file);
+										return request({
+											url: 'api/texture/uploadSkin',
+											method: 'POST',
+											data
+										}).then(res => {
+											if (res.data && res.data.success) {
+												info.onSuccess(res.data);
+											} else {
+												message.error(res.data.message);
+											}
+										});
+									}}
+									beforeUpload={beforeUpload}
+									onChange={handleChange}>
+									<UploadOutlined loading={loading}/>
+								</Upload>])
+							}
+						/>
+
+						<div className="footer">
+							<Button
+								block
+								type="danger" onClick={() => {
+									localStorage.clear();
+									window.location.reload();
+								}}
+							>Logout
 							</Button>
-						</Upload>}
-						<br/>
-						{skin ? <Button type="primary" onClick={saveSkin}>Set Skin</Button> : null}
-						<Button
-							type="danger" onClick={() => {
-								localStorage.clear();
-								window.location.reload();
-							}}
-						>Logout
-						</Button>
+						</div>
 					</div>
 				</TabPane>
 			</Tabs>

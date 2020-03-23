@@ -19,11 +19,14 @@ let mainWindow;
 const createMainWindow = async () => {
 	const win = new BrowserWindow({
 		title: app.name,
-		width: 425,
-		height: 650,
-		minWidth: 390,
+		autoHideMenuBar: true,
+		width: 348,
+		height: 660,
+		minWidth: 348,
+		maxWidth: 348,
+		maximizable: false,
 		backgroundColor: '#ffffff',
-		minHeight: 450,
+		minHeight: 630,
 		webPreferences: {
 			nodeIntegration: true
 		}
@@ -35,7 +38,11 @@ const createMainWindow = async () => {
 		mainWindow = undefined;
 	});
 
-	await win.loadFile(path.join(__dirname, 'app/index.html'));
+	if (is.development) {
+		await win.loadURL('http://localhost:9000');
+	} else {
+		await win.loadFile(path.join(__dirname, 'app/index.html'));
+	}
 
 	return win;
 };
@@ -79,8 +86,8 @@ ipc.on('launch', (event, data) => {
 			type: 'release'
 		},
 		memory: {
-			max: '6000',
-			min: '4000'
+			max: '1536',
+			min: '1024'
 		}
 	};
 

@@ -20,7 +20,7 @@
 		"postinstall": "electron-builder install-app-deps",
 		"lint": "xo",
 		"test": "npm run lint",
-		"dev": "webpack --watch",
+		"dev": "webpack-dev-server",
 		"startall": "npm-run-all --parallel dev start",
 		"start": "electron .",
 		"pack": "electron-builder --dir",
@@ -70,6 +70,7 @@
 		"npm-run-all": "^4.1.5",
 		"webpack": "^4.42.0",
 		"webpack-cli": "^3.3.11",
+		"webpack-dev-server": "^3.10.3",
 		"xo": "^0.25.3"
 	},
 	"xo": {

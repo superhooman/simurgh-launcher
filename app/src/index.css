@@ -52,3 +52,12 @@ body{
     display: block;
     margin: auto;
 }
+
+.footer{
+    padding-top: 24px ;
+}
+
+.profile{
+    height: calc(100vh - 164px);
+    overflow-y: auto;
+}

@@ -4,6 +4,11 @@ const path = require('path');
 module.exports = {
 	target: 'electron-renderer',
 	entry: './app/src/entry.js',
+	devServer: {
+		contentBase: path.join(__dirname, '/app'),
+		compress: true,
+		port: 9000
+	},
 	output: {
 		path: path.join(__dirname, '/app/build'),
 		publicPath: 'build/',
